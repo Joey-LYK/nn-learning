@@ -1,20 +1,23 @@
 /**
- * task_menu.c — 菜单渲染与用户交互实现
+ * menu.c — CLI 视图实现
  */
 
-#include "apps/demo/menu.h"
-#include "trainer/reporter.h"
+#include "view/cli/menu.h"
+#include "capability/reporter.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-int task_menu_run(Task **tasks, int count, TrainCallback callback, void *user_data) {
+int cli_menu_run(TrainingService *svc, TrainCallback callback, void *user_data) {
+    int count = training_service_get_count(svc);
+
     printf("\n");
     printf("╔══════════════════════════════════════════════════╗\n");
     printf("║   神经网络训练平台 — 多任务训练演示               ║\n");
     printf("╠══════════════════════════════════════════════════╣\n");
 
     for (int i = 0; i < count; i++) {
-        printf("║  %d. %-44s ║\n", i + 1, tasks[i]->name);
+        Task *t = training_service_get_task(svc, i);
+        printf("║  %d. %-44s ║\n", i + 1, t->name);
     }
 
     printf("║ ───────────────────────────────────────────────── ║\n");
@@ -35,6 +38,6 @@ int task_menu_run(Task **tasks, int count, TrainCallback callback, void *user_da
         return -1;
     }
 
-    nn_trainer_run(tasks[choice - 1], callback, user_data);
+    training_service_run(svc, choice - 1, callback, user_data);
     return choice;
 }

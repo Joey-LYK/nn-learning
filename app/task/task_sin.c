@@ -4,7 +4,7 @@
  * 输入：1 个值 x ∈ [0, 2π]    输出：1 个值 y ≈ sin(x)
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 

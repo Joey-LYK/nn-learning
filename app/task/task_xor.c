@@ -4,7 +4,7 @@
  * 输入：2 个值 (0/1)    输出：1 个值 (0/1)
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 
 static void generate(double *input, double *target) {

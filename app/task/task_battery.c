@@ -4,7 +4,7 @@
  * 输入：3 个值 (端电压, 电流, 温度，归一化)    输出：1 个值 (SOC 0~1)
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -16,7 +16,6 @@ static double gauss_rand(double mean, double std) {
 }
 
 static double ocv_from_soc(double soc) {
-    /* 三段式 OCV-SOC 曲线 */
     if (soc < 0.1) return 3.0 + (4.2 - 3.0) * soc / 0.1;
     if (soc < 0.9) return 4.2 + (3.8 - 4.2) * (soc - 0.1) / 0.8;
     return 3.8 + (3.0 - 3.8) * (soc - 0.9) / 0.1;
@@ -24,22 +23,21 @@ static double ocv_from_soc(double soc) {
 
 static double internal_resistance(double soc, double temp_c) {
     double T_K = temp_c + 273.15;
-    double Ea = 30000.0;  /* 活化能 */
-    double R0 = 0.05;     /* SOC=1 时内阻 */
+    double Ea = 30000.0;
+    double R0 = 0.05;
     return R0 * exp((Ea / 8.314) * (1.0 / T_K - 1.0 / 298.15)) / soc;
 }
 
 static void generate(double *input, double *target) {
-    double soc      = ((double)rand() / RAND_MAX);                  /* 0~1 */
-    double temp    = ((double)rand() / RAND_MAX) * 45.0 + (-10.0);   /* -10~35°C */
-    double current = ((double)rand() / RAND_MAX) * 2.0 - 1.0;      /* -1~1A */
+    double soc      = ((double)rand() / RAND_MAX);
+    double temp    = ((double)rand() / RAND_MAX) * 45.0 + (-10.0);
+    double current = ((double)rand() / RAND_MAX) * 2.0 - 1.0;
     double r       = internal_resistance(soc, temp);
 
     double V_full  = 4.2;
     double V_empty = 3.0;
     double v_terminal = ocv_from_soc(soc) - current * r;
 
-    /* 测量噪声 */
     v_terminal += gauss_rand(0, 0.01);
     current += gauss_rand(0, 0.05);
 

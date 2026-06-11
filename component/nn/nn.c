@@ -1,17 +1,12 @@
 /**
- * nn.c — 神经网络核心实现
- *
- * 网络生命周期（create/add_layer/destroy）、前向传播、反向传播、权重更新。
- * 激活函数、损失函数、序列化拆分到独立文件。
+ * nn.c — MLP 神经网络组件实现
  */
 
-#include "nn.h"
+#include "component/nn/nn.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-
-/* ====== 数学工具 ====== */
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -24,9 +19,6 @@ double nn_gauss_rand(void) {
     return sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
 }
 
-/* ====== 激活函数（供反向传播使用） ====== */
-
-/* 正向激活 */
 static double activate(double x, Activation type) {
     switch (type) {
         case ACT_SIGMOID: return 1.0 / (1.0 + exp(-x));
@@ -38,7 +30,6 @@ static double activate(double x, Activation type) {
     }
 }
 
-/* 导数（输入已激活值 out 和原始值 net） */
 static double activate_derivative(double out, double net, Activation type) {
     switch (type) {
         case ACT_SIGMOID: return out * (1.0 - out);
@@ -49,8 +40,6 @@ static double activate_derivative(double out, double net, Activation type) {
         default:          return 1.0;
     }
 }
-
-/* ====== 生命周期 ====== */
 
 NeuralNet* nn_create(double learning_rate) {
     NeuralNet *nn = (NeuralNet*)malloc(sizeof(NeuralNet));
@@ -81,7 +70,6 @@ void nn_add_layer(NeuralNet *nn, int size, Activation activation) {
         layer->out     = (double*)malloc(sizeof(double) * size);
         layer->error   = (double*)malloc(sizeof(double) * size);
 
-        /* Xavier 初始化 */
         double scale = sqrt(2.0 / (prev->size + size));
         for (int i = 0; i < w_count; i++)
             layer->weights[i] = nn_gauss_rand() * scale;
@@ -109,8 +97,6 @@ void nn_destroy(NeuralNet *nn) {
     free(nn);
 }
 
-/* ====== 前向传播 ====== */
-
 void nn_forward(NeuralNet *nn, double *input, double *output) {
     NNLayer *layers = nn->layers;
     int n = nn->layer_count;
@@ -132,7 +118,6 @@ void nn_forward(NeuralNet *nn, double *input, double *output) {
             cur->out[i] = activate(cur->net[i], cur->activation);
         }
 
-        /* Softmax 整层处理 */
         if (cur->activation == ACT_SOFTMAX) {
             double max_val = cur->net[0];
             for (int i = 1; i < cur->size; i++)
@@ -154,8 +139,6 @@ void nn_forward(NeuralNet *nn, double *input, double *output) {
     }
 }
 
-/* ====== 反向传播 ====== */
-
 double nn_backward(NeuralNet *nn, double *target) {
     NNLayer *layers = nn->layers;
     int n = nn->layer_count;
@@ -163,13 +146,11 @@ double nn_backward(NeuralNet *nn, double *target) {
     double loss = 0.0;
 
     if (out_layer->activation == ACT_SOFTMAX) {
-        /* Softmax + 交叉熵：δ = out - target */
         for (int i = 0; i < out_layer->size; i++) {
             out_layer->error[i] = out_layer->out[i] - target[i];
             loss -= target[i] * log(out_layer->out[i] + 1e-10);
         }
     } else {
-        /* MSE：δ = (out - target) × f'(net) */
         for (int i = 0; i < out_layer->size; i++) {
             double diff = out_layer->out[i] - target[i];
             out_layer->error[i] = diff * activate_derivative(out_layer->out[i],
@@ -179,7 +160,6 @@ double nn_backward(NeuralNet *nn, double *target) {
         }
     }
 
-    /* 逐层往回传 */
     for (int L = n - 2; L >= 1; L--) {
         NNLayer *cur  = &layers[L];
         NNLayer *next = &layers[L + 1];
@@ -196,8 +176,6 @@ double nn_backward(NeuralNet *nn, double *target) {
     nn->total_loss = loss;
     return loss;
 }
-
-/* ====== 权重更新 ====== */
 
 void nn_update(NeuralNet *nn) {
     NNLayer *layers = nn->layers;
@@ -218,8 +196,6 @@ void nn_update(NeuralNet *nn) {
     }
 }
 
-/* ====== 便捷 API ====== */
-
 double nn_train_step(NeuralNet *nn, double *input, double *target) {
     nn_forward(nn, input, NULL);
     double loss = nn_backward(nn, target);
@@ -230,8 +206,6 @@ double nn_train_step(NeuralNet *nn, double *input, double *target) {
 void nn_predict(NeuralNet *nn, double *input, double *output) {
     nn_forward(nn, input, output);
 }
-
-/* ====== 工具 ====== */
 
 void nn_print_structure(NeuralNet *nn) {
     const char *act_names[] = {
@@ -259,26 +233,23 @@ void nn_print_structure(NeuralNet *nn) {
                L, role, layer->size, act_names[layer->activation]);
         if (L > 0) {
             int w = layer->size * layer->input_size;
-            printf("║       ↳ weights: %d, biases: %d        ║\n", w, layer->size);
+            printf("║       weights: %d, biases: %d        ║\n", w, layer->size);
         }
     }
     printf("╚══════════════════════════════════════════╝\n\n");
 }
 
-/* ====== 序列化 ====== */
-
 int nn_export(NeuralNet *nn, void *buffer, int *size) {
-    /* 计算总大小 */
     int total = 0;
-    total += sizeof(int) * 3;                    /* magic, layer_count, flags */
-    total += sizeof(double);                      /* learning_rate */
+    total += sizeof(int) * 3;
+    total += sizeof(double);
     for (int L = 0; L < nn->layer_count; L++) {
         NNLayer *layer = &nn->layers[L];
-        total += sizeof(int) * 2;                 /* size, activation */
+        total += sizeof(int) * 2;
         if (L > 0) {
             int w_count = layer->size * layer->input_size;
-            total += sizeof(double) * w_count;    /* weights */
-            total += sizeof(double) * layer->size; /* biases */
+            total += sizeof(double) * w_count;
+            total += sizeof(double) * layer->size;
         }
     }
     *size = total;
@@ -286,7 +257,7 @@ int nn_export(NeuralNet *nn, void *buffer, int *size) {
     if (!buffer) return 0;
 
     unsigned char *p = (unsigned char*)buffer;
-    int magic = 0x4E4E3031;  /* "NN01" */
+    int magic = 0x4E4E3031;
     int layer_count = nn->layer_count;
     int flags = 0;
 
@@ -297,14 +268,14 @@ int nn_export(NeuralNet *nn, void *buffer, int *size) {
 
     for (int L = 0; L < nn->layer_count; L++) {
         NNLayer *layer = &nn->layers[L];
-        int size = layer->size;
+        int sz = layer->size;
         int act  = (int)layer->activation;
-        memcpy(p, &size, sizeof(int)); p += sizeof(int);
+        memcpy(p, &sz, sizeof(int)); p += sizeof(int);
         memcpy(p, &act,  sizeof(int)); p += sizeof(int);
         if (L > 0) {
             int w_count = layer->size * layer->input_size;
             memcpy(p, layer->weights, sizeof(double) * w_count);  p += sizeof(double) * w_count;
-            memcpy(p, layer->biases,  sizeof(double) * size);     p += sizeof(double) * size;
+            memcpy(p, layer->biases,  sizeof(double) * sz);     p += sizeof(double) * sz;
         }
     }
     return 0;

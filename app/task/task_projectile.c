@@ -4,7 +4,7 @@
  * 输入：2 个值 (角度°, 初速度 m/s)    输出：1 个值 (水平距离 m)
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -17,14 +17,14 @@
 #endif
 
 static void generate(double *input, double *target) {
-    double angle = ((double)rand() / RAND_MAX) * 80.0 + 10.0;  /* 10~90° */
-    double v0    = ((double)rand() / RAND_MAX) * 40.0 + 10.0;  /* 10~50 m/s */
+    double angle = ((double)rand() / RAND_MAX) * 80.0 + 10.0;
+    double v0    = ((double)rand() / RAND_MAX) * 40.0 + 10.0;
     double rad   = angle * M_PI / 180.0;
-    input[0] = angle / 90.0;   /* 归一化到 [0,1] */
-    input[1] = v0 / 50.0;     /* 归一化到 [0,1] */
+    input[0] = angle / 90.0;
+    input[1] = v0 / 50.0;
 
     double t_flight = 2.0 * v0 * sin(rad) / G;
-    target[0] = (v0 * cos(rad) * t_flight) / 255.0;  /* 归一化到 [0,1] */
+    target[0] = (v0 * cos(rad) * t_flight) / 255.0;
 }
 
 Task task_projectile = {

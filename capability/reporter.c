@@ -1,8 +1,8 @@
 /**
- * nn_reporter.c — 输出/报告服务实现
+ * reporter.c — 报告能力实现
  */
 
-#include "reporter.h"
+#include "capability/reporter.h"
 #include <stdio.h>
 
 void nn_reporter_progress(const TrainReport *report, void *user_data) {
@@ -25,16 +25,5 @@ void nn_reporter_progress(const TrainReport *report, void *user_data) {
 }
 
 void nn_reporter_summary(const TrainResult *result) {
-    /* 训练完成后已在 nn_trainer_run 中打印摘要 */
     (void)result;
-}
-
-void nn_reporter_validate_regression(const Task *task, NeuralNet *nn, int count) {
-    (void)task; (void)nn; (void)count;
-    /* 回归验证集成在 nn_trainer_run 中 */
-}
-
-void nn_reporter_validate_classification(const Task *task, NeuralNet *nn, int count) {
-    (void)task; (void)nn; (void)count;
-    /* 分类验证集成在 nn_trainer_run 中 */
 }

@@ -5,7 +5,7 @@
  *   0=冷, 1=舒适, 2=闷, 3=热
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(nn_framework LANGUAGES C)
 
-# ====== 编译选项 ======
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
@@ -15,57 +14,61 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-O2)
 endif()
 
-# ====== 公共头文件路径 ======
-# 双模式支持：qualified path ("core/nn.h") + short name ("nn_config.h")
 include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/config
     ${CMAKE_SOURCE_DIR}/platform
 )
 
-# ====== 收集源文件 ======
-# core 层 — 计算内核（张量、算子、自动微分）
-set(CORE_SRCS
-    ${CMAKE_SOURCE_DIR}/core/nn.c
+# ====== component layer ======
+set(NN_SRCS
+    ${CMAKE_SOURCE_DIR}/component/nn/nn.c
 )
 
-# trainer 层 — 训练引擎（优化器、调度器、loss、训练循环、报告）
-set(TRAINER_SRCS
-    ${CMAKE_SOURCE_DIR}/trainer/trainer.c
-    ${CMAKE_SOURCE_DIR}/trainer/reporter.c
+# ====== capability layer ======
+set(CAPABILITY_SRCS
+    ${CMAKE_SOURCE_DIR}/capability/trainer.c
+    ${CMAKE_SOURCE_DIR}/capability/reporter.c
 )
 
-# apps/demo 层 — 交互式教学演示（任务 + 菜单）
-file(GLOB DEMO_TASK_SRCS ${CMAKE_SOURCE_DIR}/apps/demo/tasks/task_*.c)
-set(DEMO_SRCS
-    ${CMAKE_SOURCE_DIR}/apps/demo/main.c
-    ${CMAKE_SOURCE_DIR}/apps/demo/menu.c
-    ${DEMO_TASK_SRCS}
+# ====== app layer (tasks) ======
+file(GLOB TASK_SRCS ${CMAKE_SOURCE_DIR}/app/task/task_*.c)
+
+# ====== service layer ======
+set(SERVICE_SRCS
+    ${CMAKE_SOURCE_DIR}/service/training_service.c
 )
 
-# ====== 主可执行文件：交互式训练演示 ======
+# ====== view layer (cli) ======
+set(CLI_VIEW_SRCS
+    ${CMAKE_SOURCE_DIR}/view/cli/menu.c
+)
+
+# ====== main executable (cli mode) ======
 add_executable(nn_demo
-    ${DEMO_SRCS}
-    ${TRAINER_SRCS}
-    ${CORE_SRCS}
+    ${CMAKE_SOURCE_DIR}/main.c
+    ${CLI_VIEW_SRCS}
+    ${SERVICE_SRCS}
+    ${CAPABILITY_SRCS}
+    ${NN_SRCS}
+    ${TASK_SRCS}
 )
 target_link_libraries(nn_demo m)
 
-# ====== 示例：最小示例（只用 core） ======
+# ====== example: minimal (component only) ======
 add_executable(ex_minimal
     ${CMAKE_SOURCE_DIR}/examples/ex_minimal.c
-    ${CORE_SRCS}
+    ${NN_SRCS}
 )
 target_link_libraries(ex_minimal m)
 
-# ====== 示例：模型导出（core + trainer + task_sin） ======
+# ====== example: export (component + capability + task_sin) ======
 add_executable(ex_export
     ${CMAKE_SOURCE_DIR}/examples/ex_export.c
-    ${CORE_SRCS}
-    ${TRAINER_SRCS}
-    ${CMAKE_SOURCE_DIR}/apps/demo/tasks/task_sin.c
+    ${NN_SRCS}
+    ${CAPABILITY_SRCS}
+    ${CMAKE_SOURCE_DIR}/app/task/task_sin.c
 )
 target_link_libraries(ex_export m)
 
-# ====== 安装 ======
 install(TARGETS nn_demo ex_minimal ex_export RUNTIME DESTINATION bin)

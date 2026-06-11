@@ -5,7 +5,7 @@
  *   0=启动 1=停止 2=左转 3=右转 4=加速
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -22,13 +22,12 @@ static double gauss_rand(double mean, double std) {
 static void generate(double *input, double *target) {
     int cmd = rand() % N_CLASSES;
     double freq[N_FEATURES] = {0};
-    double f0 = 300.0 + cmd * 200.0; /* 每个命令的基频不同 */
-    /* 模拟 MFCC 频谱包络：基频 + 谐波 */
+    double f0 = 300.0 + cmd * 200.0;
     freq[0] = f0 * 0.5 + gauss_rand(f0 * 0.45, f0 * 0.1);
     for (int i = 1; i < N_FEATURES - 2; i++)
         freq[i] = freq[0] * (1.0 + i * 0.3) + gauss_rand(0, f0 * 0.05);
-    freq[N_FEATURES - 2] = f0 * 8.0 + gauss_rand(0, f0 * 0.2); /* 高频能量 */
-    freq[N_FEATURES - 1] = gauss_rand(0, 0.3);                 /* 噪声底 */
+    freq[N_FEATURES - 2] = f0 * 8.0 + gauss_rand(0, f0 * 0.2);
+    freq[N_FEATURES - 1] = gauss_rand(0, 0.3);
 
     double max_val = 0;
     for (int i = 0; i < N_FEATURES; i++)

@@ -4,7 +4,7 @@
  * 输入：3 个值 (ADC读数, 环境温度, 供电电压，归一化)    输出：1 个值 (真实温度)
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -16,29 +16,24 @@ static double gauss_rand(double mean, double std) {
 }
 
 static void generate(double *input, double *target) {
-    double real_temp = ((double)rand() / RAND_MAX) * 80.0 - 10.0;   /* -10~70°C */
-    double env_temp = ((double)rand() / RAND_MAX) * 50.0 + 10.0;    /* 10~60°C */
-    double v_supply = ((double)rand() / RAND_MAX) * 0.5 + 4.8;       /* 4.8~5.3V */
+    double real_temp = ((double)rand() / RAND_MAX) * 80.0 - 10.0;
+    double env_temp = ((double)rand() / RAND_MAX) * 50.0 + 10.0;
+    double v_supply = ((double)rand() / RAND_MAX) * 0.5 + 4.8;
 
-    /* NTC 热敏电阻非线性 */
     double beta = 3950.0;
     double T0 = 25.0, R0 = 10000.0;
     double Rt = R0 * exp(beta * (1.0 / (real_temp + 273.15) - 1.0 / (T0 + 273.15)));
 
-    /* 分压 + 自发热 */
     double R_series = 10000.0;
     double self_heat = 0.0;
     double I_sense = v_supply / (R_series + Rt);
-    self_heat = I_sense * I_sense * 50.0 * 0.001; /* ~50Ω 串联电阻 */
+    self_heat = I_sense * I_sense * 50.0 * 0.001;
 
-    /* ADC 读数 */
     double v_ntc = v_supply * Rt / (R_series + Rt);
     double v_adc = v_ntc + gauss_rand(0, 0.02) + self_heat * 0.01;
 
-    /* 电压波动 */
     v_supply += gauss_rand(0, 0.05);
 
-    /* 归一化 */
     input[0] = (v_adc - 0.0) / 5.0;
     input[1] = (env_temp - 10.0) / 60.0;
     input[2] = (v_supply - 4.8) / 0.5;
@@ -50,7 +45,7 @@ static void generate(double *input, double *target) {
     if (input[2] < 0) input[2] = 0;
     if (input[2] > 1) input[2] = 1;
 
-    target[0] = (real_temp + 10.0) / 80.0;  /* 归一化到 [0, 1] */
+    target[0] = (real_temp + 10.0) / 80.0;
 }
 
 Task task_temp_comp = {

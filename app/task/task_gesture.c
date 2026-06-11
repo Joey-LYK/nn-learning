@@ -5,7 +5,7 @@
  *   0=静止, 1=挥手, 2=敲击, 3=摇晃
  */
 
-#include "task.h"
+#include "capability/data_source.h"
 #include <stdlib.h>
 #include <math.h>
 
