@@ -1,1 +1,0 @@
- -lwinmm -lws2_32 -lcomdlg32 -limm32 -lMsimg32 -lgdi32 -luser32 -lshell32 -lole32 -ld2d1 -ldsound -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

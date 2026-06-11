@@ -1,1 +1,0 @@
--IN:/nn_framework -IN:/nn_framework/config -IN:/nn_framework/platform -IN:/nn_framework/component/PainterEngine -IN:/nn_framework/component/PainterEngine/platform/windows -IN:/nn_framework/component/PainterEngine/runtime

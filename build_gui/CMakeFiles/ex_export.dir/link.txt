@@ -1,3 +1,0 @@
-D:\winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3\bin\cmake.exe -E rm -f CMakeFiles\ex_export.dir/objects.a
-D:\winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3\bin\ar.exe qc CMakeFiles\ex_export.dir/objects.a @CMakeFiles\ex_export.dir\objects1.rsp
-D:\winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3\bin\gcc.exe -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\ex_export.dir/objects.a -Wl,--no-whole-archive -o ex_export.exe -Wl,--out-implib,libex_export.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\ex_export.dir\linkLibs.rsp
