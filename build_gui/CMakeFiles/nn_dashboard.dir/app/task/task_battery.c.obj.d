@@ -1,7 +1,20 @@
 CMakeFiles/nn_dashboard.dir/app/task/task_battery.c.obj: \
  N:\nn_framework\app\task\task_battery.c \
  N:/nn_framework/capability/data_source.h \
- N:/nn_framework/config/nn_config.h c:\mingw\include\stdlib.h \
- c:\mingw\include\_mingw.h c:\mingw\include\msvcrtver.h \
- c:\mingw\include\w32api.h c:\mingw\include\sdkddkver.h \
- c:\mingw\lib\gcc\mingw32\6.3.0\include\stddef.h c:\mingw\include\math.h
+ N:/nn_framework/config/nn_config.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/stdlib.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/corecrt.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/_mingw.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/_mingw_mac.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/_mingw_secapi.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/vadefs.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/corecrt_wstdlib.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/lib/gcc/x86_64-w64-mingw32/16.1.0/include/limits.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/lib/gcc/x86_64-w64-mingw32/16.1.0/include/syslimits.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/limits.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/crtdefs.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/sec_api/stdlib_s.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/malloc.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/lib/gcc/x86_64-w64-mingw32/16.1.0/include/mm_malloc.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/errno.h \
+ D:/winlibs-x86_64-posix-seh-gcc-16.1.0-mingw-w64ucrt-14.0.0-r3/x86_64-w64-mingw32/include/math.h

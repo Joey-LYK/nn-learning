@@ -12,7 +12,7 @@ CMakeFiles/nn_dashboard.dir/component/PainterEngine/core/PX_Keyboard.c.obj: \
  N:\nn_framework\component\PainterEngine\core\PX_Surface.h \
  N:\nn_framework\component\PainterEngine\core\PX_Bitmap.h \
  N:\nn_framework\component\PainterEngine\core\PX_TRaw.h \
- n:\nn_framework\component\painterengine\core\px_surface.h \
+ N:\nn_framework\component\PainterEngine\core\../core/PX_Surface.h \
  N:\nn_framework\component\PainterEngine\core\PX_Png.h \
  N:\nn_framework\component\PainterEngine\core\PX_RFC1951.h \
  N:\nn_framework\component\PainterEngine\core\PX_Huffman.h \
@@ -36,7 +36,7 @@ CMakeFiles/nn_dashboard.dir/component/PainterEngine/core/PX_Keyboard.c.obj: \
  N:\nn_framework\component\PainterEngine\core\PX_Sound.h \
  N:\nn_framework\component\PainterEngine\core\PX_Wave.h \
  N:\nn_framework\component\PainterEngine\core\PX_Tuning.h \
- n:\nn_framework\component\painterengine\core\px_core.h \
+ N:\nn_framework\component\PainterEngine\core\../core/PX_Core.h \
  N:\nn_framework\component\PainterEngine\core\PX_Effect.h \
  N:\nn_framework\component\PainterEngine\core\PX_Quadtree.h \
  N:\nn_framework\component\PainterEngine\core\PX_curve25519.h \

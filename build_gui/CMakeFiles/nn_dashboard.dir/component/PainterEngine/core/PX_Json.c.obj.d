@@ -14,7 +14,7 @@ CMakeFiles/nn_dashboard.dir/component/PainterEngine/core/PX_Json.c.obj: \
  N:\nn_framework\component\PainterEngine\core\PX_Quicksort.h \
  N:\nn_framework\component\PainterEngine\core\PX_Bitmap.h \
  N:\nn_framework\component\PainterEngine\core\PX_TRaw.h \
- n:\nn_framework\component\painterengine\core\px_surface.h \
+ N:\nn_framework\component\PainterEngine\core\../core/PX_Surface.h \
  N:\nn_framework\component\PainterEngine\core\PX_Png.h \
  N:\nn_framework\component\PainterEngine\core\PX_RFC1951.h \
  N:\nn_framework\component\PainterEngine\core\PX_Huffman.h \

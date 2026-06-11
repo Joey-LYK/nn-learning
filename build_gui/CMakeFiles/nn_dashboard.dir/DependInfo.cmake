@@ -192,6 +192,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "N:/nn_framework/component/PainterEngine/platform/windows/px_socket.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_socket.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_socket.c.obj.d"
   "N:/nn_framework/component/PainterEngine/platform/windows/px_tcp.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_tcp.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_tcp.c.obj.d"
   "N:/nn_framework/component/PainterEngine/platform/windows/px_thread.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_thread.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_thread.c.obj.d"
+  "N:/nn_framework/component/PainterEngine/platform/windows/px_time.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_time.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_time.c.obj.d"
   "N:/nn_framework/component/PainterEngine/platform/windows/px_udp.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_udp.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_udp.c.obj.d"
   "N:/nn_framework/component/PainterEngine/platform/windows/px_visualos.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_visualos.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_visualos.c.obj.d"
   "N:/nn_framework/component/PainterEngine/runtime/PainterEngine_Application.c" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/runtime/PainterEngine_Application.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/runtime/PainterEngine_Application.c.obj.d"
@@ -202,11 +203,16 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "N:/nn_framework/view/gui/dash_model.c" "CMakeFiles/nn_dashboard.dir/view/gui/dash_model.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/view/gui/dash_model.c.obj.d"
   "N:/nn_framework/view/gui/dash_view.c" "CMakeFiles/nn_dashboard.dir/view/gui/dash_view.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/view/gui/dash_view.c.obj.d"
   "N:/nn_framework/view/gui/main.c" "CMakeFiles/nn_dashboard.dir/view/gui/main.c.obj" "gcc" "CMakeFiles/nn_dashboard.dir/view/gui/main.c.obj.d"
-  "N:/nn_framework/view/gui/pe_display_gdi.cpp" "CMakeFiles/nn_dashboard.dir/view/gui/pe_display_gdi.cpp.obj" "gcc" "CMakeFiles/nn_dashboard.dir/view/gui/pe_display_gdi.cpp.obj.d"
+  "N:/nn_framework/component/PainterEngine/platform/windows/px_audio.cpp" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_audio.cpp.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_audio.cpp.obj.d"
+  "N:/nn_framework/component/PainterEngine/platform/windows/px_display.cpp" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_display.cpp.obj" "gcc" "CMakeFiles/nn_dashboard.dir/component/PainterEngine/platform/windows/px_display.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
 set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

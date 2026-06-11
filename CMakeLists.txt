@@ -88,6 +88,7 @@ file(GLOB PE_RUNTIME_SRCS
 
 set(PE_WIN_C_SRCS
     ${PE_DIR}/platform/windows/px_main.c
+    ${PE_DIR}/platform/windows/px_time.c
     ${PE_DIR}/platform/windows/px_file.c
     ${PE_DIR}/platform/windows/px_httpserver.c
     ${PE_DIR}/platform/windows/px_mmap.c
@@ -102,7 +103,8 @@ set(PE_WIN_C_SRCS
 )
 
 set(PE_WIN_CPP_SRCS
-    ${CMAKE_SOURCE_DIR}/view/gui/pe_display_gdi.cpp
+    ${PE_DIR}/platform/windows/px_audio.cpp
+    ${PE_DIR}/platform/windows/px_display.cpp
 )
 
 set(GUI_VIEW_SRCS
@@ -132,7 +134,7 @@ target_include_directories(nn_dashboard PRIVATE
 )
 
 target_link_libraries(nn_dashboard
-    winmm ws2_32 comdlg32 imm32 Msimg32 gdi32 user32 shell32 ole32
+    winmm ws2_32 comdlg32 imm32 Msimg32 gdi32 user32 shell32 ole32 d2d1 dsound
 )
 
 endif()
