@@ -1,0 +1,3 @@
+"D:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\nn_dashboard.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\nn_dashboard.dir/objects.a @CMakeFiles\nn_dashboard.dir\objects1.rsp
+C:\MinGW\bin\c++.exe -O3 -DNDEBUG -mwindows -Wl,--whole-archive CMakeFiles\nn_dashboard.dir/objects.a -Wl,--no-whole-archive -o nn_dashboard.exe -Wl,--out-implib,libnn_dashboard.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\nn_dashboard.dir\linkLibs.rsp

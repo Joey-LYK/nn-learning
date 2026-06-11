@@ -1,13 +1,14 @@
 /**
- * menu.h — CLI 视图：菜单渲染与用户交互
+ * menu.h — CLI 视图
+ *
+ * 只依赖 service/view_interface.h，与 service/capability/component 完全解耦。
  */
 
 #ifndef VIEW_CLI_MENU_H
 #define VIEW_CLI_MENU_H
 
-#include "service/training_service.h"
-#include "capability/trainer.h"
+#include "service/view_interface.h"
 
-int cli_menu_run(TrainingService *svc, TrainCallback callback, void *user_data);
+void cli_menu_run(ViewInterface *iface, void *ctx);
 
 #endif /* VIEW_CLI_MENU_H */

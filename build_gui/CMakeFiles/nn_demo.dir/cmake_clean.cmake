@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/nn_demo.dir/app/task/task_battery.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_battery.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_comfort.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_comfort.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_gesture.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_gesture.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_projectile.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_projectile.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_sevenseg.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_sevenseg.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_sin.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_sin.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_temp_comp.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_temp_comp.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_voice.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_voice.c.obj.d"
+  "CMakeFiles/nn_demo.dir/app/task/task_xor.c.obj"
+  "CMakeFiles/nn_demo.dir/app/task/task_xor.c.obj.d"
+  "CMakeFiles/nn_demo.dir/capability/reporter.c.obj"
+  "CMakeFiles/nn_demo.dir/capability/reporter.c.obj.d"
+  "CMakeFiles/nn_demo.dir/capability/trainer.c.obj"
+  "CMakeFiles/nn_demo.dir/capability/trainer.c.obj.d"
+  "CMakeFiles/nn_demo.dir/component/nn/nn.c.obj"
+  "CMakeFiles/nn_demo.dir/component/nn/nn.c.obj.d"
+  "CMakeFiles/nn_demo.dir/main.c.obj"
+  "CMakeFiles/nn_demo.dir/main.c.obj.d"
+  "CMakeFiles/nn_demo.dir/service/training_service.c.obj"
+  "CMakeFiles/nn_demo.dir/service/training_service.c.obj.d"
+  "CMakeFiles/nn_demo.dir/view/cli/menu.c.obj"
+  "CMakeFiles/nn_demo.dir/view/cli/menu.c.obj.d"
+  "libnn_demo.dll.a"
+  "nn_demo.exe"
+  "nn_demo.exe.manifest"
+  "nn_demo.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/nn_demo.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

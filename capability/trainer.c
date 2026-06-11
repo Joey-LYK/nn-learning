@@ -122,3 +122,18 @@ TrainResult nn_trainer_run(const Task *task, TrainCallback callback, void *user_
 
     return result;
 }
+
+double nn_trainer_train_epoch(NeuralNet *nn, const Task *task) {
+    double *input  = (double*)malloc(sizeof(double) * task->input_dim);
+    double *target = (double*)malloc(sizeof(double) * task->output_dim);
+    double total_loss = 0.0;
+
+    for (int s = 0; s < task->config.samples_per_epoch; s++) {
+        task->generate(input, target);
+        total_loss += nn_train_step(nn, input, target);
+    }
+
+    free(input);
+    free(target);
+    return total_loss / task->config.samples_per_epoch;
+}

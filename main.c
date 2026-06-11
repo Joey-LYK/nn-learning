@@ -1,12 +1,11 @@
 /**
  * main.c — 程序总入口
  *
- * 只做三件事：初始化平台 → 注册 task → 启动视图。
+ * 只做三件事：初始化平台 → 注册 task → 启动 CLI 视图。
  * 不包含任何业务逻辑。
  */
 
 #include "view/cli/menu.h"
-#include "capability/reporter.h"
 #include "service/training_service.h"
 #include "platform/nn_platform.h"
 #include <stdlib.h>
@@ -39,8 +38,13 @@ int main(void) {
     training_service_register(&svc, &task_gesture);
     training_service_register(&svc, &task_voice);
 
-    cli_menu_run(&svc, nn_reporter_progress, NULL);
+    ViewInterface iface;
+    void *ctx;
+    training_service_get_interface(&svc, &iface, &ctx);
 
+    cli_menu_run(&iface, ctx);
+
+    training_service_release_interface(ctx);
     free(svc.tasks);
     return 0;
 }

@@ -29,5 +29,6 @@ typedef struct {
 
 NeuralNet* nn_trainer_build(const Task *task);
 TrainResult nn_trainer_run(const Task *task, TrainCallback callback, void *user_data);
+double nn_trainer_train_epoch(NeuralNet *nn, const Task *task);
 
 #endif /* CAPABILITY_TRAINER_H */
