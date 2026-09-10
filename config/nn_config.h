@@ -46,7 +46,7 @@ typedef enum {
 #endif
 
 #ifndef NN_VIEW_GUI
-#define NN_VIEW_GUI    0
+#define NN_VIEW_GUI    1
 #endif
 
 #endif /* NN_CONFIG_H */
