@@ -1,0 +1,7 @@
+build/
+build_gui/
+*.exe
+*.obj
+*.o
+*.a
+build.log
