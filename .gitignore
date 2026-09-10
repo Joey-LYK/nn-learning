@@ -1,0 +1,17 @@
+# 构建产物
+bin/
+obj/
+build/
+*.exe
+*.o
+*.obj
+*.px
+
+# IDE 个人文件
+*.layout
+*.depend
+*.cbp.bak
+.vs/
+
+# 工具缓存
+.understand-anything/
