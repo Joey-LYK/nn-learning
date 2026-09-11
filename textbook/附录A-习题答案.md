@@ -584,6 +584,35 @@ net = Network([2, 4, 1])
 net.train(xor_data, epochs=200, lr=0.5)
 ```
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：`[...] * 50` 列表重复，C 用循环逐条拷贝；Python 版没设随机种子，C 版补了 `srand(42)` 便于复现。本段接第 17 章的 C 版库使用。*
+
+```c
+/* 接第 17 章的 C 版库（把该章前三个 C 块拼在本段之前），加上 main 即可运行 */
+int main(void) {
+    srand(42);                   /* Python 版未设种子，这里固定以便复现 */
+
+    Sample base[4] = {
+        {0.0, 0.0, 0.0}, {0.0, 1.0, 1.0},
+        {1.0, 0.0, 1.0}, {1.0, 1.0, 0.0},
+    };
+    Sample xor_data[200];
+    for (int i = 0; i < 200; i++) {
+        xor_data[i] = base[i % 4];       /* 重复成 200 条 */
+    }
+
+    Network net;
+    int sizes[3] = {2, 4, 1};
+    net_init(&net, sizes, 3);
+    net_train(&net, xor_data, 200, 200, 0.5, 10);   /* epochs=200, lr=0.5 */
+    return 0;
+}
+```
+
+</details>
+
 重复复制的好处有两个：一是每轮 200 次更新，权重调整更充分；二是 `train` 里每轮 `shuffle`，200 条时样本顺序被充分打乱，梯度方向不会连续被同一类样本主导。只用 4 条原样数据时，每轮只有 4 次更新且顺序模式固定，收敛慢且更容易卡在坏的局部解上。本质上是"小批量 + 打乱"对训练的稳定作用。
 
 **习题3** 改动三处：
@@ -616,6 +645,41 @@ def load(path):
     net.history = data.get("history", [])   # 新增：旧文件没有也不报错
     return net
 ```
+
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*和 Python 版一样，这是"改动示意"而非完整程序——单独不可编译，接在第 17 章的 C 版库上看。C 版没有 json，历史记录随 net_save/net_load 的文本格式一起读写。*
+
+```c
+/* ① Network 结构体加两个字段（对应 Python 加 self.history） */
+typedef struct {
+    int nl;
+    Layer layers[MAX_L];
+    double history[MAX_EPOCHS];      /* 新增：训练损失历史 */
+    int n_history;                   /* 新增：已记录轮数 */
+} NetworkV2;
+
+/* ② net_train 每轮结束时补一行（其余不变） */
+/* net->history[net->n_history++] = loss / n; */
+
+/* ③ net_save 里补写历史（放在版本头之后） */
+/* fprintf(f, "%d\n", net->n_history);
+   for (int i = 0; i < net->n_history; i++) {
+       fprintf(f, "%.17g\n", net->history[i]);
+   } */
+
+/*    net_load 里对应补读；旧文件没有这一段也不报错 */
+/* if (fscanf(f, "%d", &net->n_history) == 1) {
+       for (int i = 0; i < net->n_history; i++) {
+           fscanf(f, "%lf", &net->history[i]);
+       }
+   } else {
+       net->n_history = 0;           对应 data.get("history", []) 的默认值
+   } */
+```
+
+</details>
 
 **习题4** 隐藏层只剩 2 个神经元，模型容量太小，学不会圆形分界线——这是欠拟合（训练损失和验证损失都会偏高）。改进方向：(1) 恢复或加大隐藏层宽度（比如 8~16 个神经元），或增加一层隐藏层；(2) 在容量不变的前提下延长训练轮数、调优学习率，让有限的容量被充分利用；(3) 若能改数据，也可以构造更有信息量的输入特征（例如直接给出 $x_1^2 + x_2^2$ 作为第三维输入），降低对容量的需求。
 

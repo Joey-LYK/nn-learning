@@ -315,6 +315,63 @@ print(f"词2 的新表示：[{out2[0]:.3f}, {out2[1]:.3f}]")
 
 词1 的结果和手算完全一致。词2 的 Query 是 [0,1]，和 k2 匹配度高，所以 73% 看自己——每个词按自己的 Query 独立决定看向谁。你可以改动 keys 里的数字再运行：让 k2 变得和 q1 更像（比如 [0.9, 0.1]），会看到词1 投向词2 的权重明显上升——注意力权重完全由内容决定。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：`zip(query, key)` 配对点积，C 用下标循环；`attention` 通过指针同时带回权重和新表示（Python 返回二元组）。运算只有点积、softmax、加权求和，两种语言逐位一致——注意力的"老朋友"本性在 C 里看得更清楚。*
+
+```c
+#include <stdio.h>
+#include <math.h>
+
+void softmax(const double scores[], int n, double out[]) {
+    double total = 0;
+    for (int i = 0; i < n; i++) {
+        out[i] = exp(scores[i]);
+        total += out[i];
+    }
+    for (int i = 0; i < n; i++) {
+        out[i] /= total;
+    }
+}
+
+/* weights 带回注意力权重，out 带回新表示 */
+void attention(const double query[2], const double keys[2][2],
+               const double values[2][2], double weights[], double out[]) {
+    double scores[2];
+    for (int i = 0; i < 2; i++) {
+        scores[i] = query[0] * keys[i][0] + query[1] * keys[i][1];  /* 点积打分 */
+    }
+    softmax(scores, 2, weights);
+    for (int d = 0; d < 2; d++) {
+        out[d] = 0;
+        for (int i = 0; i < 2; i++) {
+            out[d] += weights[i] * values[i][d];   /* 加权求和 Value */
+        }
+    }
+}
+
+int main(void) {
+    /* 词1: q=[1,0] k=[1,0] v=[1,1]；词2: k=[0,1] v=[2,0] */
+    double keys[2][2]   = {{1, 0}, {0, 1}};
+    double values[2][2] = {{1, 1}, {2, 0}};
+
+    double w1[2], out1[2], w2[2], out2[2];
+    double q1[2] = {1, 0}, q2[2] = {0, 1};
+
+    attention(q1, keys, values, w1, out1);
+    printf("词1 的注意力权重：自己 %.3f，词2 %.3f\n", w1[0], w1[1]);
+    printf("词1 的新表示：[%.3f, %.3f]\n", out1[0], out1[1]);
+
+    attention(q2, keys, values, w2, out2);
+    printf("词2 的注意力权重：词1 %.3f，自己 %.3f\n", w2[0], w2[1]);
+    printf("词2 的新表示：[%.3f, %.3f]\n", out2[0], out2[1]);
+    return 0;
+}
+```
+
+</details>
+
 ## 常见误区
 
 **误区：注意力是一种新的神经元/激活函数。**

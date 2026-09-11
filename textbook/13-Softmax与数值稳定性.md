@@ -275,6 +275,127 @@ for T in [0.5, 1.0, 2.0, 100.0]:
 - 实验 2：不归一化 + 小学习率时，2000 步后损失卡在 3.1 左右，$w_1$ 几乎为 0（真值 1000）——小量纲特征被完全无视；学习率稍大就 4 步内发散。归一化后，$w_1, w_2$ 分别收敛到真值 2.0 和 1.0，损失降到 0。
 - 实验 3：$T$ 从 0.5 升到 100，概率分布从 `[0.864, 0.117, 0.019]` 逐渐摊平到 `[0.337, 0.333, 0.330]`——低温尖锐、高温平坦，与正文手算的数字一致。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：最大的分野在实验 1——Python 溢出会抛 `OverflowError`，程序大声报错；C 没有异常，`exp(1000)` 悄悄返回 `inf`，概率变成 `nan` 继续往下跑，污染一圈才被发现。所以 C 程序员更要靠"减最大值"这类防护，不能指望运行时报错。列表推导在 C 里仍是拆成显式循环。*
+
+```c
+#include <stdio.h>
+#include <math.h>
+
+void softmax_naive(const double zs[], int n, double out[]) {
+    double s = 0;
+    for (int i = 0; i < n; i++) {
+        out[i] = exp(zs[i]);        /* C 溢出不报错：这里会得到 inf */
+        s += out[i];
+    }
+    for (int i = 0; i < n; i++) {
+        out[i] /= s;                /* inf / inf = nan，静默产出垃圾 */
+    }
+}
+
+void softmax_stable(const double zs[], int n, double out[]) {
+    double m = zs[0];
+    for (int i = 1; i < n; i++) {
+        if (zs[i] > m) m = zs[i];   /* 先减最大值 */
+    }
+    double s = 0;
+    for (int i = 0; i < n; i++) {
+        out[i] = exp(zs[i] - m);
+        s += out[i];
+    }
+    for (int i = 0; i < n; i++) {
+        out[i] /= s;
+    }
+}
+
+/* 三个 softmax 共享"减最大值"的骨架，只有指数那一步不同 */
+void softmax_T(const double zs[], int n, double T, double out[]) {
+    double m = zs[0];
+    for (int i = 1; i < n; i++) {
+        if (zs[i] > m) m = zs[i];   /* 减最大值防护依然保留 */
+    }
+    double s = 0;
+    for (int i = 0; i < n; i++) {
+        out[i] = exp((zs[i] - m) / T);
+        s += out[i];
+    }
+    for (int i = 0; i < n; i++) {
+        out[i] /= s;
+    }
+}
+
+/* ---- 实验2：量纲悬殊 vs 归一化 ---- */
+typedef struct { double x1, x2, y; } Point;
+
+double train(const Point data[], int n, double lr, int steps,
+             double *pw1, double *pw2) {
+    double w1 = 0.0, w2 = 0.0, loss = 0.0;
+    for (int s = 0; s < steps; s++) {
+        double g1 = 0, g2 = 0;
+        loss = 0.0;
+        for (int i = 0; i < n; i++) {
+            double d = w1 * data[i].x1 + w2 * data[i].x2 - data[i].y;
+            loss += d * d;
+            g1 += 2 * d * data[i].x1;
+            g2 += 2 * d * data[i].x2;
+        }
+        w1 -= lr * g1;
+        w2 -= lr * g2;
+        if (loss > 1e8) break;
+    }
+    *pw1 = w1;
+    *pw2 = w2;
+    return loss;
+}
+
+int main(void) {
+    printf("== 实验1: Softmax 数值稳定 ==\n");
+    double zs[3] = {2.0, 1.0, 0.1}, out[3];
+
+    softmax_naive(zs, 3, out);
+    printf("普通输入: [%.4f, %.4f, %.4f]\n", out[0], out[1], out[2]);
+    softmax_stable(zs, 3, out);
+    printf("稳定版本: [%.4f, %.4f, %.4f]\n", out[0], out[1], out[2]);
+
+    double zs_big[3] = {1000.0, 1001.0, 1002.0};
+    softmax_naive(zs_big, 3, out);  /* 不会抛异常，会打印出 nan */
+    printf("朴素版(大输入): [%.4f, %.4f, %.4f]  ← C 溢出变 inf/nan\n",
+           out[0], out[1], out[2]);
+    softmax_stable(zs_big, 3, out);
+    printf("稳定版本: [%.4f, %.4f, %.4f]\n", out[0], out[1], out[2]);
+
+    printf("\n== 实验2: 量纲悬殊 vs 归一化 ==\n");
+    /* 真实规律 y = 1000*x1 + 0.001*x2, 两个样本 */
+    Point raw[2] = {{0.001, 500.0, 1.5}, {0.002, 100.0, 2.1}};  /* 原始量纲 */
+    Point norm[2] = {{0.5, 0.5, 1.5}, {1.0, 0.1, 2.1}};         /* 归一化后 */
+
+    double w1, w2, loss;
+    loss = train(raw, 2, 1e-6, 2000, &w1, &w2);
+    printf("不归一化(小学习率): w1=%.4f(真值1000) w2=%.6f(真值0.001) 损失=%.4f\n",
+           w1, w2, loss);
+
+    loss = train(raw, 2, 1e-4, 30, &w1, &w2);
+    printf("不归一化(大学习率): 损失=%.2e  %s\n",
+           loss, loss > 1e8 ? "发散!" : "收敛");
+
+    loss = train(norm, 2, 0.5, 2000, &w1, &w2);
+    printf("归一化之后:       w1=%.4f(真值2.0) w2=%.4f(真值1.0) 损失=%.8f\n",
+           w1, w2, loss);
+
+    printf("\n== 实验3: 温度系数 ==\n");
+    double Ts[4] = {0.5, 1.0, 2.0, 100.0};
+    for (int i = 0; i < 4; i++) {
+        softmax_T(zs, 3, Ts[i], out);
+        printf("T=%6.1f: [%.3f, %.3f, %.3f]\n", Ts[i], out[0], out[1], out[2]);
+    }
+    return 0;
+}
+```
+
+</details>
+
 ## 常见误区
 
 **误区：softmax 会改变"哪个类别最大"的排名。**

@@ -136,6 +136,142 @@ class Net:
 
 **`loss`：第 8 章的 MSE。** 对所有样本的误差平方取平均，用来观察训练进度。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：Python 的类在 C 里是"结构体 + 一组以自身为第一个参数的函数"——`net_forward(net, ...)` 的第一个参数 `net` 就是 Python 里隐身的 `self`；`self.w` 的"列表套列表套列表"在 C 里是一张三维数组。为了聚焦算法，这里用固定上限的数组代替动态内存（想要任意层宽的工程版写法，见 `examples/c-tutorial/`）。另外本书任务都是单输出，C 版把输出维数固定为 1 以保持简短。*
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MAX_M 4      /* 最多几个权重矩阵（本书任务最多 2 个，留余量） */
+#define MAX_N 32     /* 每层最多多少个神经元 */
+
+typedef struct {
+    int nl;                          /* 权重矩阵个数，对应 len(self.w) */
+    int rows[MAX_M], cols[MAX_M];    /* 第 i 层：行=本层神经元数，列=前层宽度 */
+    double w[MAX_M][MAX_N][MAX_N];   /* self.w[i][r][c]，三维数组 */
+    double b[MAX_M][MAX_N];          /* self.b[i][r] */
+    int hidden_act, out_act;         /* 0=sigmoid 1=tanh 2=linear */
+    double lr;
+    double acts[MAX_M + 1][MAX_N];   /* 逐层保存激活值，反向传播要用 */
+    int act_sizes[MAX_M + 1];
+} Net;
+
+typedef struct {                     /* 一条训练样本：输入向量 + 目标值 */
+    double x[2];
+    double y[1];
+    int nx;                          /* 输入是几维 */
+} Sample;
+
+/* ---- 随机数工具：对应 Python 的 random 模块 ---- */
+double grand(void) {                 /* 高斯随机数，对应 random.gauss(0,1) */
+    double u1 = (rand() + 1.0) / (RAND_MAX + 2.0);
+    double u2 = (rand() + 1.0) / (RAND_MAX + 2.0);
+    return sqrt(-2.0 * log(u1)) * cos(6.283185307179586 * u2);
+}
+
+void net_init(Net *net, const int sizes[], int n,
+              int hidden_act, int out_act, double lr) {
+    net->nl = n - 1;                 /* 搭骨架：sizes=[2,4,1] 表示 2 输入 4 隐藏 1 输出 */
+    net->hidden_act = hidden_act;
+    net->out_act = out_act;
+    net->lr = lr;
+    for (int i = 0; i < net->nl; i++) {
+        int r = sizes[i + 1], c = sizes[i];
+        net->rows[i] = r;
+        net->cols[i] = c;
+        double scale = sqrt(2.0 / (r + c));           /* 控制初始权重幅度 */
+        for (int j = 0; j < r; j++) {
+            for (int k = 0; k < c; k++) {
+                net->w[i][j][k] = grand() * scale;    /* 高斯随机数，不能全相同 */
+            }
+            net->b[i][j] = 0.0;                       /* 偏置从中立起点开始 */
+        }
+    }
+}
+
+double activate(double z, int act) {
+    if (act == 0) return 1.0 / (1.0 + exp(-z));   /* sigmoid */
+    if (act == 1) return tanh(z);                 /* tanh */
+    return z;                                     /* linear：原样输出 */
+}
+
+/* 前向传播：返回指向最后一层激活值（即预测值 ŷ）的指针 */
+double *net_forward(Net *net, const double x[], int in_size) {
+    net->act_sizes[0] = in_size;
+    for (int c = 0; c < in_size; c++) {
+        net->acts[0][c] = x[c];
+    }
+    for (int i = 0; i < net->nl; i++) {
+        int act = (i < net->nl - 1) ? net->hidden_act : net->out_act;
+        for (int r = 0; r < net->rows[i]; r++) {
+            double z = net->b[i][r];
+            for (int c = 0; c < net->cols[i]; c++) {
+                z += net->w[i][r][c] * net->acts[i][c];   /* 行乘列加偏置 */
+            }
+            net->acts[i + 1][r] = activate(z, act);
+        }
+        net->act_sizes[i + 1] = net->rows[i];
+    }
+    return net->acts[net->nl];       /* acts 的最后一层就是预测值 */
+}
+
+/* 训练一步：前向 + 反向传播 + 按梯度更新（对应 train_step） */
+void net_train_step(Net *net, const double x[], int in_size, const double y[]) {
+    net_forward(net, x, in_size);
+
+    double delta[MAX_N];
+    delta[0] = net->acts[net->nl][0] - y[0];       /* 输出层误差：预测减真实 */
+    if (net->out_act == 0) {                       /* sigmoid 输出要乘导数 a(1-a) */
+        double a = net->acts[net->nl][0];
+        delta[0] *= a * (1 - a);
+    }
+
+    for (int layer = net->nl - 1; layer >= 0; layer--) {   /* 从后往前 */
+        int np = net->act_sizes[layer];
+        double new_delta[MAX_N];
+        for (int c = 0; c < np; c++) {
+            new_delta[c] = 0.0;
+        }
+        for (int r = 0; r < net->rows[layer]; r++) {
+            for (int c = 0; c < np; c++) {
+                new_delta[c] += net->w[layer][r][c] * delta[r];              /* 误差往前传 */
+                net->w[layer][r][c] -= net->lr * delta[r] * net->acts[layer][c];  /* 更新权重 */
+            }
+            net->b[layer][r] -= net->lr * delta[r];                        /* 更新偏置 */
+        }
+        if (layer > 0) {                       /* 给前一层准备 delta */
+            for (int c = 0; c < np; c++) {
+                double a = net->acts[layer][c];
+                if (net->hidden_act == 0) {
+                    new_delta[c] *= a * (1 - a);        /* sigmoid 的导数 */
+                } else {
+                    new_delta[c] *= 1 - a * a;          /* tanh 的导数 */
+                }
+            }
+            for (int c = 0; c < np; c++) {
+                delta[c] = new_delta[c];
+            }
+        }
+    }
+}
+
+/* MSE 损失：全部样本误差平方取平均（对应 loss 方法） */
+double net_loss(Net *net, const Sample data[], int n) {
+    double total = 0.0;
+    for (int i = 0; i < n; i++) {
+        double *a = net_forward(net, data[i].x, data[i].nx);
+        total += (a[0] - data[i].y[0]) * (a[0] - data[i].y[0]);
+    }
+    return total / n;
+}
+```
+
+</details>
+
 ## 实验 A：拟合 sin(x)（回归任务）
 
 任务：网络只看 $(x, \sin x)$ 的样本，学着画出 sin 曲线。网络结构 1-16-1：1 个输入，16 个隐藏神经元（tanh），1 个线性输出。
@@ -198,6 +334,64 @@ x=5.0   预测 -0.9205   真实 -0.9589
 1. loss 不是严格单调下降的（比如 2400 轮的 0.0032 到 3200 轮的 0.0055 反而升了）。因为每轮只用 30 个随机样本，梯度带有"抽样噪声"，偶尔会走上坡路。长期趋势向下就没问题。
 2. 抽查的 6 个点都不是训练集里的点（训练点是随机撒的），预测依然很准——说明网络学到的是 sin 的**形状**，不是背答案。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：Python 的 `random.shuffle` 和 `random.uniform` 在 C 里没有现成的，要自己写——洗牌用经典的 Fisher-Yates 算法，均匀随机数用 `rand()` 除以 `RAND_MAX` 缩放。C 的随机数序列与 Python 不同，loss 数字不会逐位相同，但"先快后慢、降到千分之一量级"的趋势必然一致。*
+
+```c
+/* 接上面的 Net 代码，同一个文件里继续写。下面是实验 A：拟合 sin(x) */
+
+/* Fisher-Yates 洗牌，对应 random.shuffle：把编号表随机打乱 */
+void shuffle(int idx[], int n) {
+    for (int i = n - 1; i > 0; i--) {
+        int j = rand() % (i + 1);        /* 从 0..i 里随机挑一个 */
+        int t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+}
+
+int main(void) {
+    srand(7);                            /* 对应 random.seed(7) */
+
+    Sample data[200];
+    for (int i = 0; i < 200; i++) {      /* 在 [0, 2π] 上撒 200 个采样点 */
+        double xv = ((double)rand() / RAND_MAX) * 6.283185307179586;  /* uniform(0, 2π) */
+        data[i].x[0] = xv;
+        data[i].y[0] = sin(xv);
+        data[i].nx = 1;
+    }
+
+    Net net;
+    int sizes[3] = {1, 16, 1};
+    net_init(&net, sizes, 3, 1, 2, 0.02);    /* 1-16-1：隐藏 tanh(1)，输出 linear(2) */
+
+    int order[200];                          /* 洗牌用的编号表 */
+    for (int i = 0; i < 200; i++) order[i] = i;
+
+    for (int epoch = 1; epoch <= 4000; epoch++) {
+        shuffle(order, 200);                 /* 每轮打乱数据 */
+        for (int k = 0; k < 30; k++) {       /* 每轮随机取 30 个样本训练 */
+            Sample *s = &data[order[k]];
+            net_train_step(&net, s->x, s->nx, s->y);
+        }
+        if (epoch == 1 || epoch % 800 == 0) {
+            printf("epoch %5d   loss %.6f\n", epoch, net_loss(&net, data, 200));
+        }
+    }
+
+    printf("\n训练后抽查：\n");
+    double xs[6] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    for (int i = 0; i < 6; i++) {
+        double xin[1] = {xs[i]};
+        double pred = net_forward(&net, xin, 1)[0];
+        printf("x=%.1f   预测 %+.4f   真实 %+.4f\n", xs[i], pred, sin(xs[i]));
+    }
+    return 0;
+}
+```
+
+</details>
+
 ## 实验 B：XOR——为什么必须有隐藏层
 
 XOR（异或）逻辑门：两个输入不同则输出 1，相同则输出 0。全部样本只有 4 条：
@@ -256,6 +450,44 @@ epoch  5000   loss 0.250397
 
 单神经元的极限就在这里：它是一条直线，而 XOR 需要曲线。loss 卡住的 0.25 正是"全部猜 0.5"时的 MSE——每题错 0.5，平方 0.25，平均还是 0.25。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：继续沿用上面的 `Net`。Python 用 `(x, y)` 元组列表存数据，C 用 `Sample` 结构体数组；初始化器的 `{0.0, 0.0}, {0.0}, 2` 依次填入 `x`、`y`、`nx`。另外 C 和 Python 的随机数序列不同：`srand(7)` 是特意选的，能让 C 版和 Python 版一样落进"全部输出 ≈0.5"的鞍点（换别的种子可能卡在别的对称解上，但 loss 照样卡死 0.2504，结论不变）。*
+
+```c
+/* 接同一个文件继续写。把 main 里实验 A 的部分注释掉，改为调用本函数 */
+void experiment_b1(void) {           /* 实验 B1：无隐藏层的 2-1 网络 */
+    Sample xor_data[4] = {
+        {{0.0, 0.0}, {0.0}, 2}, {{0.0, 1.0}, {1.0}, 2},
+        {{1.0, 0.0}, {1.0}, 2}, {{1.0, 1.0}, {0.0}, 2},
+    };
+
+    printf("=== 无隐藏层 ===\n");
+    Net net1;
+    int sizes[2] = {2, 1};
+    srand(7);                                /* 选 7：复现"全部输出 ≈0.5"的鞍点 */
+    net_init(&net1, sizes, 2, 0, 0, 0.5);    /* 2-1：输入直接连 sigmoid 输出 */
+
+    for (int epoch = 1; epoch <= 5000; epoch++) {
+        for (int i = 0; i < 4; i++) {
+            net_train_step(&net1, xor_data[i].x, 2, xor_data[i].y);
+        }
+        if (epoch == 1 || epoch % 1000 == 0) {
+            printf("epoch %5d   loss %.6f\n", epoch, net_loss(&net1, xor_data, 4));
+        }
+    }
+
+    for (int i = 0; i < 4; i++) {
+        double pred = net_forward(&net1, xor_data[i].x, 2)[0];
+        printf("输入 [%.1f, %.1f]   预测 %.4f   真实 %.1f\n",
+               xor_data[i].x[0], xor_data[i].x[1], pred, xor_data[i].y[0]);
+    }
+}
+```
+
+</details>
+
 ### B2：加一个隐藏层
 
 只改一处：`Net([2, 1])` 改成 `Net([2, 4, 1])`——中间加 4 个 sigmoid 隐藏神经元：
@@ -304,6 +536,43 @@ loss 一路降到 0.0008，四个预测全部正确。
 | 决策边界 | 一条直线 | 弯曲边界 |
 
 第 6 章说"没有激活函数，多层等于一层"，这个实验是它的孪生兄弟：**没有隐藏层，一层就是全部，而一层解决不了非线性问题**。深度不是玄学，是能力的分水岭。
+
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：和 B1 相比只改了一处——`sizes` 从 `{2, 1}` 变成 `{2, 4, 1}`，与 Python 版把 `Net([2, 1])` 改成 `Net([2, 4, 1])` 完全对应。`srand(42)` 对应 Python `Net` 构造函数里 `seed=42` 的默认值。随机序列不同，中间数字会与 Python 版略有出入，但"loss 一路降到千分之一量级、四个预测全部正确"的结局一致。*
+
+```c
+void experiment_b2(void) {           /* 实验 B2：加 4 个 sigmoid 隐藏神经元 */
+    Sample xor_data[4] = {
+        {{0.0, 0.0}, {0.0}, 2}, {{0.0, 1.0}, {1.0}, 2},
+        {{1.0, 0.0}, {1.0}, 2}, {{1.0, 1.0}, {0.0}, 2},
+    };
+
+    printf("\n=== 有隐藏层 ===\n");
+    Net net2;
+    int sizes[3] = {2, 4, 1};                /* 只改这一处 */
+    srand(42);
+    net_init(&net2, sizes, 3, 0, 0, 0.5);    /* 隐藏层也是 sigmoid */
+
+    for (int epoch = 1; epoch <= 5000; epoch++) {
+        for (int i = 0; i < 4; i++) {
+            net_train_step(&net2, xor_data[i].x, 2, xor_data[i].y);
+        }
+        if (epoch == 1 || epoch % 1000 == 0) {
+            printf("epoch %5d   loss %.6f\n", epoch, net_loss(&net2, xor_data, 4));
+        }
+    }
+
+    for (int i = 0; i < 4; i++) {
+        double pred = net_forward(&net2, xor_data[i].x, 2)[0];
+        printf("输入 [%.1f, %.1f]   预测 %.4f   真实 %.1f\n",
+               xor_data[i].x[0], xor_data[i].x[1], pred, xor_data[i].y[0]);
+    }
+}
+```
+
+</details>
 
 ## 常见误区
 

@@ -40,6 +40,9 @@ train_demo.exe
 运行后通过交互菜单选择 9 个训练任务（sin 拟合、XOR、舒适度分类、电池 SOC 估计、
 手势识别、语音命令识别等），详见 [examples/c-tutorial/README.md](examples/c-tutorial/README.md)。
 
+教材 `textbook/` 里每个 Python 实验代码块后还内嵌了对应的 C 语言对照折叠块
+（算法逐行对应、可直接编译运行），适合想用 C 视角逐例对照学习的读者。
+
 ### PainterEngine ANN 可视化演示
 
 使用 Code::Blocks 打开 `examples/painterengine-demo/ui.cbp` 编译运行，

@@ -333,6 +333,52 @@ print("  两者几乎相同——开头那个天差地别的输入，已经被'�
 
 实验一复现了你的手算结果（末位可能略有差异，正常）。实验二里，开头差了 200 的两个序列，11 步之后记忆几乎一样——这就是普通 RNN 的"褪色"现象，你亲眼看到了长期依赖问题。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：Python 的默认参数 `w_x=0.5, w_h=0.1, b=0.0` 在 C 里写成函数内的常量；`[100] + [0] * 10` 这种"拼列表"，在 C 里靠初始化器补零实现（`double seq_a[11] = {100}` 首元素为 100，其余自动为 0）。数值与 Python 逐位一致。*
+
+```c
+#include <stdio.h>
+#include <math.h>
+
+double rnn_step(double x, double h_prev) {
+    const double w_x = 0.5, w_h = 0.1, b = 0.0;
+    return tanh(w_h * h_prev + w_x * x + b);
+}
+
+double run(const double seq[], int n) {
+    double h = 0.0;
+    for (int i = 0; i < n; i++) {
+        h = rnn_step(seq[i], h);
+    }
+    return h;
+}
+
+int main(void) {
+    /* 实验一：正文的手算例子 */
+    double h = 0.0;
+    double xs[3] = {1, 2, 3};
+    printf("实验一：逐步记忆\n");
+    for (int t = 0; t < 3; t++) {
+        h = rnn_step(xs[t], h);
+        printf("  t=%d  输入=%g  记忆 h=%.3f\n", t + 1, xs[t], h);
+    }
+
+    /* 实验二：早期输入的影响会褪色
+       序列 A：开头是 100，后面全是 0；序列 B：开头是 -100 */
+    double seq_a[11] = {100};    /* 其余元素自动补 0 */
+    double seq_b[11] = {-100};
+    printf("实验二：11 步之后\n");
+    printf("  开头是 +100 的最终记忆：%.6f\n", run(seq_a, 11));
+    printf("  开头是 -100 的最终记忆：%.6f\n", run(seq_b, 11));
+    printf("  两者几乎相同——开头那个天差地别的输入，已经被'忘'了\n");
+    return 0;
+}
+```
+
+</details>
+
 ## 常见误区
 
 **误区：RNN 的每个时刻有各自独立的一组权重。**

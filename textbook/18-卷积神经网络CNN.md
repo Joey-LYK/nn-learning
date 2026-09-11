@@ -317,6 +317,74 @@ print("左上角 2×2 区域的最大值 =", max_pool2d(small)[0][0])
 
 可以看到：亮点在正中间时输出 72，最大池化后这个强响应被保留下来。如果你把 image 里的 9 挪到别的位置再运行，会发现特征图里的 72 也跟着挪——探测器忠实地报告了图案的位置。
 
+<details>
+<summary>🐘 C 语言对照</summary>
+
+*语言差异：Python 的 `len(image)` 动态取尺寸，C 的二维数组作参数要写明维度；四重循环的结构与 Python 完全一致——卷积本来就是为循环而生的算法。无随机数，输出与 Python 逐位一致。*
+
+```c
+#include <stdio.h>
+
+/* 3×3 卷积，步长 1，无填充 */
+void conv2d(const double image[5][5], const double kernel[3][3],
+            double output[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            double total = 0;
+            for (int ki = 0; ki < 3; ki++) {
+                for (int kj = 0; kj < 3; kj++) {
+                    total += image[i + ki][j + kj] * kernel[ki][kj];
+                }
+            }
+            output[i][j] = total;
+        }
+    }
+}
+
+/* 2×2 最大池化：这里对 2×2 的输入输出 1 个数 */
+double max_pool2d(const double fm[2][2]) {
+    double m = fm[0][0];
+    if (fm[0][1] > m) m = fm[0][1];
+    if (fm[1][0] > m) m = fm[1][0];
+    if (fm[1][1] > m) m = fm[1][1];
+    return m;
+}
+
+int main(void) {
+    double image[5][5] = {
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 9, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+    };
+    double kernel[3][3] = {
+        {-1, -1, -1},
+        {-1,  8, -1},
+        {-1, -1, -1},
+    };
+
+    double features[3][3];
+    conv2d(image, kernel, features);
+
+    printf("卷积后的特征图：\n");
+    for (int i = 0; i < 3; i++) {
+        printf("[%g, %g, %g]\n", features[i][0], features[i][1], features[i][2]);
+    }
+
+    /* 特征图是 3×3，只取左上角 2×2 区域演示 */
+    double small[2][2] = {
+        {features[0][0], features[0][1]},
+        {features[1][0], features[1][1]},
+    };
+    printf("最大池化后（特征图是 3×3，只取前 2×2 区域演示）：\n");
+    printf("左上角 2×2 区域的最大值 = %g\n", max_pool2d(small));
+    return 0;
+}
+```
+
+</details>
+
 ## 常见误区
 
 **误区：卷积核是人手工设计的，比如"边缘检测核""模糊核"。**
