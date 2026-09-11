@@ -17,6 +17,7 @@
 │   └── math/                  # 数学预科：函数与导数、线性代数、概率统计等
 ├── examples/
 │   ├── c-tutorial/            # 纯 C 教学级神经网络库 + 9 个由浅入深的训练任务
+│   ├── nn_framework/          # 分层架构的纯 C 神经网络框架（CLI 演示 + GUI 仪表盘）
 │   └── painterengine-demo/    # 基于 PainterEngine 的 ANN 可视化演示（Code::Blocks 工程）
 └── third_party/
     └── PainterEngine/         # 第三方图形引擎（见 third_party/ATTRIBUTION.md）
@@ -43,6 +44,18 @@ train_demo.exe
 
 使用 Code::Blocks 打开 `examples/painterengine-demo/ui.cbp` 编译运行，
 可交互观察神经网络训练过程与预测效果。
+
+### nn_framework 分层框架（工程级实现）
+
+教材第 17 章"从零手写神经网络库"的工程级对照：core / component / capability /
+service / app / view 分层架构，同样内置 9 个教学任务，另带 GUI 训练仪表盘。
+
+```cmd
+cd examples/nn_framework
+build.bat
+```
+
+详见 [examples/nn_framework/README.md](examples/nn_framework/README.md)。
 
 ## 学习路线建议
 

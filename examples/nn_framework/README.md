@@ -1,55 +1,50 @@
 # nn_framework — 纯 C 神经网络框架
 
-企业级分层架构，既用于教学演示，也适用于实际嵌入式工程。
+分层架构的神经网络实现，既用于教学演示，也适用于实际嵌入式工程。
+本目录是本仓库教材（`textbook/`）第 17 章"从零手写神经网络库"的工程级对照实现。
 
 ## 分层架构
 
 ```
 nn_framework/
 │
-├── core/                   ← 计算内核
-│   └── nn.h/c             前向/反向传播、权重更新、API
+├── core/
+│   └── nn.h                ← 计算内核 API 声明（前向/反向传播、权重更新、序列化）
 │
-├── model/                  ← 模型定义（预留）
-│                           网络容器、序列化（未来从 core 拆出）
+├── component/
+│   └── nn/nn.c             ← 计算内核实现（对应 core/nn.h）
 │
-├── trainer/                ← 训练引擎
-│   ├── trainer.h/c         训练循环（从 Task config 构建 + 训练 + 验证）
-│   ├── reporter.h/c        输出报告（进度条 + 验证摘要）
-│   ├── optimizer.h/c       （预留）SGD / Adam / RMSProp
-│   ├── scheduler.h/c       （预留）学习率调度
-│   └── loss.h/c            （预留）损失函数集合
+├── capability/             ← 能力层
+│   ├── trainer.h/c          训练循环（Task config 构建 + 训练 + 验证）
+│   ├── reporter.h/c         输出报告（进度条 + 验证摘要）
+│   └── data_source.h        数据源抽象
 │
-├── data/                   ← 数据流水线（预留）
-│   ├── dataset.h/c         （预留）数据集抽象接口
-│   ├── sampler.h/c         （预留）采样器
-│   └── transform.h/c       （预留）预处理/归一化
+├── service/
+│   ├── training_service.h/c ← 服务层：训练任务编排
+│   └── view_interface.h     视图接口抽象
 │
-├── apps/                   ← 应用层（多入口）
-│   ├── demo/               ← 交互式教学演示
-│   │   ├── tasks/          9 个自描述 task 插件
-│   │   ├── menu.h/c        菜单渲染及交互
-│   │   └── main.c          入口
-│   ├── dashboard/          （预留）GUI 版（基于 PainterEngine）
-│   └── cli/                （预留）命令行批量训练
+├── app/
+│   └── task/task_*.c       ← 9 个自描述教学任务插件
 │
-├── libs/                   ← 第三方库集中管理
-│   ├── PainterEngine/      图形引擎
-│   ├── logger/             （预留）日志模块
-│   └── comm/               （预留）通信协议
+├── view/
+│   ├── cli/menu.h/c        ← 控制台菜单视图（默认）
+│   └── gui/                ← GUI 仪表盘（基于 PainterEngine，需 -DNN_ENABLE_GUI=ON）
 │
-├── config/                 ← 编译时配置
-│   └── nn_config.h         宏开关、数据类型、Activation 枚举
+├── config/
+│   └── nn_config.h         ← 编译时配置：宏开关、数据类型、Activation 枚举
 │
-├── platform/               ← 平台适配
-│   └── nn_platform.h       控制台编码、系统 API
+├── platform/
+│   └── nn_platform.h       ← 平台适配：控制台编码、系统 API
 │
-├── examples/               ← 独立示例代码
-├── docs/                   ← 学习文档
-├── tests/                  ← 测试
+├── examples/               ← 独立示例（ex_minimal.c / ex_export.c）
+├── docs/architecture.md    ← 架构设计文档
+├── main.c                  ← CLI 入口
 ├── CMakeLists.txt
 └── build.bat
 ```
+
+GUI 依赖的 PainterEngine 图形引擎使用仓库级共享拷贝 `third_party/PainterEngine/`
+（由 CMakeLists.txt 中的 `PE_DIR` 指向），本目录不再单独携带。
 
 ## 可执行目标
 
@@ -58,6 +53,7 @@ nn_framework/
 | `nn_demo.exe` | 交互式菜单 | 选择 9 个案例训练演示 |
 | `ex_minimal.exe` | 独立运行 | 最小 API 使用示例 |
 | `ex_export.exe` | 独立运行 | 模型导出/导入演示 |
+| `nn_dashboard.exe` | GUI 窗口 | 训练过程可视化（需开启 NN_ENABLE_GUI） |
 
 ## 9 个教学案例
 
@@ -76,25 +72,27 @@ nn_framework/
 ## 构建方法
 
 ```bash
-# 方法一：直接运行 build.bat
-cd nn_framework
+# 方法一：直接运行 build.bat（Windows + MinGW）
+cd examples/nn_framework
 build.bat
 
-# 方法二：手动 cmake（中文路径下映射 N: 盘）
-subst N: "E:\work\RD\神经网络"
-cmake -S N:\nn_framework -B N:\nn_framework\build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-cmake --build N:\nn_framework\build
-subst N: /d
+# 方法二：手动 cmake（中文路径下建议先映射 N: 盘规避 MinGW 路径问题）
+cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+
+# 构建 GUI 仪表盘（Windows）
+cmake -S . -B build_gui -G "MinGW Makefiles" -DNN_ENABLE_GUI=ON
+cmake --build build_gui
 ```
 
-## 学习文档
+## 配套学习文档
 
-学习文档已迁移到 `docs/` 目录。
+学习文档位于仓库根目录 [`docs/`](../../docs/)，系统教材位于 [`textbook/`](../../textbook/)。
 
-> **注意**：文档中 `nn.c:{line}` 行号指向旧版单片式代码（`ui/docs/example/`），
-> 新版函数位于 `core/nn.c` 中（行号已变，但函数名保持对应）。
+> 文档中 `nn.c:{line}` 行号指向旧版单片式代码，新版实现位于
+> `component/nn/nn.c`（函数名保持对应，行号有变化）。
 
 ## 依赖
 
 - GCC (MinGW) 或任意 C99 编译器
-- CMake >= 3.10（可选，可直接 gcc 编译）
+- CMake >= 3.10（可选，也可直接 gcc 编译）

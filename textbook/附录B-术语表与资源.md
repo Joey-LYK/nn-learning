@@ -95,5 +95,9 @@
 
 ## 配套代码
 
-本仓库 `examples/c-tutorial/` 下有纯 C 语言实现的教学神经网络库与 9 个训练任务，
-适合想进一步了解底层实现的读者对照阅读。
+本仓库 `examples/` 下有三套由浅入深的参考实现：
+
+- `examples/c-tutorial/`：纯 C 教学神经网络库 + 9 个训练任务，对应本书第 9、17 章的动手实验
+- `examples/nn_framework/`：分层架构的工程级框架（含 GUI 训练仪表盘），是第 17 章
+  "从零手写神经网络库"的进阶对照，适合想了解真实项目如何分层的读者
+- `examples/painterengine-demo/`：基于 PainterEngine 的 ANN 可视化演示

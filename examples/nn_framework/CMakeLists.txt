@@ -77,7 +77,7 @@ option(NN_ENABLE_GUI "Build GUI dashboard (requires Windows + PainterEngine)" OF
 
 if(NN_ENABLE_GUI AND WIN32)
 
-set(PE_DIR ${CMAKE_SOURCE_DIR}/component/PainterEngine)
+set(PE_DIR ${CMAKE_SOURCE_DIR}/../../third_party/PainterEngine)
 
 file(GLOB PE_CORE_SRCS   ${PE_DIR}/core/*.c)
 file(GLOB PE_KERNEL_SRCS ${PE_DIR}/kernel/*.c)
