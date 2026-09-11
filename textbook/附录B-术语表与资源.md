@@ -50,6 +50,13 @@
 | 迁移学习 | transfer learning | 第21章 |
 | 预训练 / 微调 | pretraining / fine-tuning | 第21章 |
 | 剪枝 / 量化 / 知识蒸馏 | pruning / quantization / knowledge distillation | 第21章 |
+| 决策树 / 基尼系数 | decision tree / Gini impurity | 附录D |
+| 朴素贝叶斯 | naive Bayes | 附录D |
+| k 近邻 | k-nearest neighbors (kNN) | 附录D |
+| 随机森林 / 支持向量机 | random forest / SVM (support vector machine) | 附录D |
+| 模板匹配 / 动态时间规整 | template matching / DTW (dynamic time warping) | 附录D |
+| 异常检测 | anomaly detection | 附录D |
+| 卡尔曼滤波 | Kalman filter | 附录D |
 
 ## 统一记号速查
 
