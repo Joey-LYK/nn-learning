@@ -11,6 +11,7 @@
 | 点积 | dot product | 第2章 |
 | 矩阵乘法 | matrix multiplication | 第2章 |
 | 期望值 / 方差 | expectation / variance | 第3章 |
+| 协方差 | covariance | 第3章 |
 | 正态分布 | normal distribution | 第3章 |
 | 指数函数 / 对数 | exponential / logarithm | 第4章 |
 | 自然常数 e | Euler's number | 第4章 |
