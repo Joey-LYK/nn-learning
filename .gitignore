@@ -15,3 +15,5 @@ build/
 
 # 工具缓存
 .understand-anything/
+__pycache__/
+*.pyc
