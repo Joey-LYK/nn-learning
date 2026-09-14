@@ -17,3 +17,7 @@ build/
 .understand-anything/
 __pycache__/
 *.pyc
+
+# 安全扫描与 AI 会话产物
+.mimosa/
+.zcode/
